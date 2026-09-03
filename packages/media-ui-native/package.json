@@ -1,0 +1,20 @@
+{
+    "name": "@media/ui-native",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p tsconfig.json"
+    },
+    "peerDependencies": {
+        "react": ">=18",
+        "react-native": ">=0.70"
+    },
+    "peerDependenciesMeta": {
+        "react-native": {
+            "optional": true
+        }
+    }
+}

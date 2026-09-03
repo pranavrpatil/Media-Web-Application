@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/media-core"
+    },
+    {
+      "path": "./packages/media-react"
+    },
+    {
+      "path": "./packages/media-native"
+    },
+    {
+      "path": "./packages/media-ui-react"
+    },
+    {
+      "path": "./packages/media-ui-native"
+    },
+    {
+      "path": "./apps/web"
+    }
+  ]
+}
