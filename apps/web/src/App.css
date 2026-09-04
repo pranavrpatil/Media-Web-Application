@@ -151,6 +151,40 @@ button.active {
     width: 100%;
 }
 
+.app-shell>[role="dialog"] {
+    align-items: center;
+    background: rgba(23, 33, 27, 0.92);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 56px 72px;
+    position: fixed;
+    z-index: 20;
+}
+
+.app-shell>[role="dialog"]>img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.app-shell>[role="dialog"]>button {
+    position: absolute;
+}
+
+.app-shell>[role="dialog"]>button:first-child {
+    right: 24px;
+    top: 24px;
+}
+
+.app-shell>[role="dialog"]>button:nth-child(2) {
+    left: 24px;
+}
+
+.app-shell>[role="dialog"]>button:last-child {
+    right: 24px;
+}
+
 .photo-meta {
     background: #fff;
     color: #59665b;

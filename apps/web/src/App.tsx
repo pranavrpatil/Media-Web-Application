@@ -124,14 +124,14 @@ function AppContent({ client }: { client: MediaClient }) {
                         hasMore={search.hasMore}
                         loadingMore={search.loading}
                         onLoadMore={search.loadMore}
+                        onItemClick={(item, index) => {
+                            setSelectedPhoto(index);
+                            client.trackView("photo", Number(item.id), item.src);
+                        }}
                         renderItem={({ item, index, getItemProps }) => (
                             <article
                                 {...getItemProps()}
                                 className="photo-card"
-                                onClick={() => {
-                                    setSelectedPhoto(index);
-                                    client.trackView("photo", Number(item.id), item.src);
-                                }}
                             >
                                 <img src={item.src} alt={item.alt} loading="lazy" />
                                 <div className="photo-meta">
