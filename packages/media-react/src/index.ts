@@ -1,3 +1,5 @@
+export { createMediaClient } from "@media/core";
+export type { MediaClient, MediaClientOptions } from "@media/core";
 export {
     MediaProvider,
     useMediaClient,
