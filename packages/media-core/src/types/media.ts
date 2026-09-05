@@ -34,7 +34,7 @@ export interface Photo {
 export interface VideoFile {
     id: number;
     quality: string;
-    fileType: string;
+    file_type: string;
     width?: number;
     height?: number;
     fps?: number;
@@ -62,8 +62,8 @@ export interface Video {
     url: string;
     image: string;
     user: VideoUser;
-    videoFiles: VideoFile[];
-    videoPictures: VideoPicture[];
+    video_files: VideoFile[];
+    video_pictures: VideoPicture[];
 }
 
 export interface PhotoPage extends Pagination {

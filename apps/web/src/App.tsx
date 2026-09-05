@@ -41,9 +41,13 @@ function AppContent({ client }: { client: MediaClient }) {
             };
         }
 
+        const playableFile = item.video_files
+            .filter((file) => file.file_type === "video/mp4")
+            .sort((first, second) => (second.width ?? 0) - (first.width ?? 0))[0];
+
         return {
             id: item.id,
-            src: item.image,
+            src: playableFile?.link ?? item.image,
             thumbnailSrc: item.image,
             alt: `Video by ${item.user.name}`,
             width: item.width,
