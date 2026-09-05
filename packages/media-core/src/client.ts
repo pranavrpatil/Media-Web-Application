@@ -66,14 +66,6 @@ export function createMediaClient(options: MediaClientOptions): MediaClient {
     const pending = new Map<string, Promise<unknown>>();
     const events = new MediaEventEmitter();
     const baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
-    const logger: MediaEventListener = (event) => {
-        const runtimeConsole = (globalThis as typeof globalThis & {
-            console?: { log: (...values: unknown[]) => void };
-        }).console;
-        runtimeConsole?.log("media-core event", event);
-    };
-
-    events.subscribe(logger);
 
     const requester = {
         request<T>(path: string, params: object = {}) {

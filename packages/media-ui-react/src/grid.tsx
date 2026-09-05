@@ -41,7 +41,7 @@ export function Grid<T extends MediaItem>({
     const getGeneratedItemProps = (item: T, index: number) => ({
         ...(getItemProps?.(item, index) ?? {}),
         role: "gridcell",
-        tabIndex: index === activeIndex ? 0 : -1,
+        tabIndex: 0,
         onClick: (event: React.MouseEvent<HTMLElement>) => {
             getItemProps?.(item, index)?.onClick?.(event);
             onItemClick?.(item, index);
@@ -54,7 +54,10 @@ export function Grid<T extends MediaItem>({
         onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
             getItemProps?.(item, index)?.onKeyDown?.(event);
             const columnStep = columnCount ?? 1;
-            if (event.key === "ArrowRight") {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onItemClick?.(item, index);
+            } else if (event.key === "ArrowRight") {
                 event.preventDefault();
                 focusItem(index + 1);
             } else if (event.key === "ArrowLeft") {

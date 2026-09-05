@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { MediaProvider, useMediaEvents, useMediaSearch, type MediaClient } from "@media/react";
 import { Grid, Lightbox, ReelSwiper, type MediaItem } from "@media/ui-react";
 import { client } from "./media-client";
@@ -13,7 +13,7 @@ function AppContent({ client }: { client: MediaClient }) {
     const [query, setQuery] = useState("nature");
     const [submittedQuery, setSubmittedQuery] = useState("nature");
     const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
-    const [showReels, setShowReels] = useState(false);
+    const [reelsDismissed, setReelsDismissed] = useState(false);
     const [activeReel, setActiveReel] = useState(0);
     const [lastEvent, setLastEvent] = useState<string | null>(null);
 
@@ -62,6 +62,20 @@ function AppContent({ client }: { client: MediaClient }) {
     const videos = mode === "video" ? items : [];
     const selectedItem = selectedPhoto === null ? null : photos[selectedPhoto];
 
+    const showReels = mode === "video" && videos.length > 0 && !reelsDismissed;
+
+    useEffect(() => {
+        if (
+            mode === "video" &&
+            showReels &&
+            activeReel >= videos.length - 1 &&
+            search.hasMore &&
+            !search.loading
+        ) {
+            void search.loadMore();
+        }
+    }, [activeReel, mode, search.hasMore, search.loadMore, search.loading, showReels, videos.length]);
+
     const submitSearch = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const nextQuery = query.trim();
@@ -73,7 +87,7 @@ function AppContent({ client }: { client: MediaClient }) {
     const changeMode = (nextMode: "photo" | "video") => {
         setMode(nextMode);
         setSelectedPhoto(null);
-        setShowReels(false);
+        setReelsDismissed(false);
     };
 
     return (
@@ -157,13 +171,13 @@ function AppContent({ client }: { client: MediaClient }) {
                 <section aria-label="Video results">
                     <div className="section-heading">
                         <div><p className="eyebrow">Reels</p><h2>{videos.length} videos for &quot;{submittedQuery}&quot;</h2></div>
-                        <button type="button" onClick={() => setShowReels(true)}>Open reels</button>
+                        <button type="button" onClick={() => setReelsDismissed(false)}>Open reels</button>
                     </div>
                     <div className="video-list">
                         {videos.map((item, index) => (
                             <button type="button" className="video-card" key={item.id} onClick={() => {
                                 setActiveReel(index);
-                                setShowReels(true);
+                                setReelsDismissed(false);
                                 client.trackView("video", Number(item.id), item.src);
                             }}>
                                 <img src={item.thumbnailSrc ?? item.src} alt={item.alt} loading="lazy" />
@@ -191,7 +205,7 @@ function AppContent({ client }: { client: MediaClient }) {
 
             {showReels && videos.length > 0 && (
                 <div className="reel-overlay">
-                    <button className="reel-close" type="button" onClick={() => setShowReels(false)}>Close reels</button>
+                    <button className="reel-close" type="button" onClick={() => setReelsDismissed(true)}>Close reels</button>
                     <ReelSwiper
                         items={videos}
                         activeIndex={activeReel}
