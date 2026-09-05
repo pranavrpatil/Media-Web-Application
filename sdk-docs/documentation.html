@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Media SDK Documentation</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #172033;
+            background: #f5f7fb;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        a {
+            color: #293a9b;
+        }
+
+        header {
+            margin-bottom: 48px;
+        }
+
+        .eyebrow {
+            color: #5263c8;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 12px 0;
+            font-size: clamp(2.3rem, 6vw, 4rem);
+            line-height: 1.05;
+            letter-spacing: -.04em;
+        }
+
+        h2 {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid #dfe4ef;
+        }
+
+        h3 {
+            margin-top: 32px;
+        }
+
+        p,
+        li {
+            color: #536078;
+            line-height: 1.7;
+        }
+
+        code {
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #293a9b;
+            background: #e9ecfb;
+        }
+
+        pre {
+            overflow-x: auto;
+            padding: 20px;
+            border-radius: 8px;
+            color: #edf1ff;
+            background: #172033;
+            line-height: 1.6;
+        }
+
+        pre code {
+            padding: 0;
+            color: inherit;
+            background: transparent;
+        }
+
+        #full-reference {
+            color: #536078;
+            line-height: 1.7;
+        }
+
+        #full-reference h1,
+        #full-reference h2,
+        #full-reference h3 {
+            color: #172033;
+        }
+
+        #full-reference h1 {
+            margin-top: 0;
+            font-size: clamp(2rem, 5vw, 3rem);
+        }
+
+        #full-reference h2 {
+            margin-top: 48px;
+        }
+
+        #full-reference pre {
+            color: #edf1ff;
+        }
+
+        #full-reference table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+        }
+
+        #full-reference th,
+        #full-reference td {
+            padding: 12px;
+            border: 1px solid #dfe4ef;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        #full-reference th {
+            color: #172033;
+            background: #edf0f8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #dfe4ef;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: #172033;
+            background: #edf0f8;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 28px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <a class="back" href="index.html">&larr; Back to SDK home</a>
+        <header>
+            <p class="eyebrow">Media SDK</p>
+            <h1>Documentation</h1>
+            <p>A TypeScript ecosystem for consuming Pexels media through a framework-agnostic client, with React and
+                React Native adapters.</p>
+        </header>
+
+        <h2>Architecture</h2>
+        <ul>
+            <li><code>@media/core</code> contains the Pexels client, typed media contracts, caching, request
+                de-duplication, errors, and events.</li>
+            <li><code>@media/react</code> provides <code>MediaProvider</code> and React hooks.</li>
+            <li><code>@media/native</code> provides the React Native adapter.</li>
+            <li><code>@media/ui-react</code> is an independent headless UI package.</li>
+        </ul>
+
+        <h2>Installation</h2>
+        <pre><code>npm install @media/core
+npm install @media/react react
+npm install @media/native react react-native</code></pre>
+
+        <h2>Authentication</h2>
+        <p>Create a client with a Pexels API key. Never commit the key to source control.</p>
+        <pre><code>import { createMediaClient } from "@media/core";
+
+const mediaClient = createMediaClient({
+  apiKey: "YOUR_PEXELS_API_KEY",
+});</code></pre>
+
+        <h2>Photo APIs</h2>
+        <pre><code>const searchPage = await mediaClient.photos.search({
+  query: "mountains",
+  page: 1,
+  perPage: 20,
+  orientation: "landscape",
+});
+
+const curatedPage = await mediaClient.photos.curated({
+  page: 1,
+  perPage: 20,
+});
+
+const photo = await mediaClient.photos.getById(123);</code></pre>
+
+        <h2>Video APIs</h2>
+        <pre><code>const videoPage = await mediaClient.videos.search({
+  query: "ocean",
+  page: 1,
+  perPage: 15,
+  orientation: "landscape",
+});
+
+const video = await mediaClient.videos.getById(456);</code></pre>
+
+        <h2>Errors</h2>
+        <p>SDK-generated failures use <code>MediaSdkError</code> where possible.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Meaning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>INVALID_CONFIGURATION</code></td>
+                    <td>Blank API key or no runtime fetch implementation.</td>
+                </tr>
+                <tr>
+                    <td><code>INVALID_REQUEST</code></td>
+                    <td>A photo or video search query is blank.</td>
+                </tr>
+                <tr>
+                    <td><code>HTTP_ERROR</code></td>
+                    <td>Pexels returned a non-2xx response.</td>
+                </tr>
+                <tr>
+                    <td><code>NETWORK_ERROR</code></td>
+                    <td>The fetch operation failed before a response was received.</td>
+                </tr>
+                <tr>
+                    <td><code>INVALID_RESPONSE</code></td>
+                    <td>The response body was not valid JSON.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Full reference</h2>
+        <p>The complete source reference is shown below.</p>
+        <article id="full-reference">Loading the complete SDK reference...</article>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        fetch("README.md")
+            .then((response) => {
+                if (!response.ok) throw new Error("Unable to load README.md");
+                return response.text();
+            })
+            .then((readme) => {
+                document.getElementById("full-reference").innerHTML = marked.parse(readme);
+            })
+            .catch(() => {
+                document.getElementById("full-reference").textContent =
+                    "The complete reference could not be loaded. Open README.md from the sdk-docs folder.";
+            });
+    </script>
+</body>
+
+</html>
