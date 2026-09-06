@@ -12,7 +12,7 @@ function AppContent({ client }: { client: MediaClient }) {
     const [mode, setMode] = useState<"photo" | "video">("photo");
     const [query, setQuery] = useState("nature");
     const [submittedQuery, setSubmittedQuery] = useState("nature");
-    const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
+    const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
     const [reelsDismissed, setReelsDismissed] = useState(false);
     const [activeReel, setActiveReel] = useState(0);
     const [lastEvent, setLastEvent] = useState<string | null>(null);
@@ -60,8 +60,10 @@ function AppContent({ client }: { client: MediaClient }) {
 
     const photos = mode === "photo" ? items : [];
     const videos = mode === "video" ? items : [];
-    const selectedItem = selectedPhoto === null ? null : photos[selectedPhoto];
-
+    const selectedCollection = mode === "photo" ? photos : videos;
+    const selectedItem = selectedMediaIndex === null
+        ? null
+        : selectedCollection[selectedMediaIndex] ?? null;
     const showReels = mode === "video" && videos.length > 0 && !reelsDismissed;
 
     useEffect(() => {
@@ -86,7 +88,7 @@ function AppContent({ client }: { client: MediaClient }) {
 
     const changeMode = (nextMode: "photo" | "video") => {
         setMode(nextMode);
-        setSelectedPhoto(null);
+        setSelectedMediaIndex(null);
         setReelsDismissed(false);
     };
 
@@ -143,7 +145,7 @@ function AppContent({ client }: { client: MediaClient }) {
                         loadingMore={search.loading}
                         onLoadMore={search.loadMore}
                         onItemClick={(item, index) => {
-                            setSelectedPhoto(index);
+                            setSelectedMediaIndex(index);
                             client.trackView("photo", Number(item.id), item.src);
                         }}
                         renderItem={({ item, index, getItemProps }) => (
@@ -173,31 +175,45 @@ function AppContent({ client }: { client: MediaClient }) {
                         <div><p className="eyebrow">Reels</p><h2>{videos.length} videos for &quot;{submittedQuery}&quot;</h2></div>
                         <button type="button" onClick={() => setReelsDismissed(false)}>Open reels</button>
                     </div>
-                    <div className="video-list">
-                        {videos.map((item, index) => (
-                            <button type="button" className="video-card" key={item.id} onClick={() => {
-                                setActiveReel(index);
-                                setReelsDismissed(false);
-                                client.trackView("video", Number(item.id), item.src);
-                            }}>
+                    <Grid
+                        items={videos}
+                        ariaLabel="Video search results"
+                        columnCount={4}
+                        hasMore={search.hasMore}
+                        loadingMore={search.loading}
+                        onLoadMore={search.loadMore}
+                        onItemClick={(item, index) => {
+                            setSelectedMediaIndex(index);
+                            setActiveReel(index);
+                            setReelsDismissed(false);
+                            client.trackView("video", Number(item.id), item.src);
+                        }}
+                        renderItem={({ item, getItemProps }) => (
+                            <article {...getItemProps()} className="video-card">
                                 <img src={item.thumbnailSrc ?? item.src} alt={item.alt} loading="lazy" />
                                 <span>{item.alt}</span>
-                            </button>
-                        ))}
-                    </div>
-                    {search.hasMore && <button className="load-more" type="button" onClick={() => void search.loadMore()}>Load more videos</button>}
+                            </article>
+                        )}
+                    />
                 </section>
             )}
 
             <Lightbox
                 open={selectedItem !== null}
                 item={selectedItem}
-                items={photos}
-                index={selectedPhoto ?? 0}
-                onClose={() => setSelectedPhoto(null)}
-                onPrevious={() => setSelectedPhoto((value) => value === null ? null : Math.max(0, value - 1))}
-                onNext={() => setSelectedPhoto((value) => value === null ? null : Math.min(photos.length - 1, value + 1))}
-                renderMedia={({ item }) => <img src={item.src} alt={item.alt} />}
+                items={selectedCollection}
+                index={selectedMediaIndex ?? 0}
+                onClose={() => {
+                    setSelectedMediaIndex(null);
+                }}
+                onPrevious={() => setSelectedMediaIndex((value) => value === null ? null : Math.max(0, value - 1))}
+                onNext={() => setSelectedMediaIndex((value) => {
+                    const lastIndex = (mode === "photo" ? photos : videos).length - 1;
+                    return value === null ? null : Math.min(lastIndex, value + 1);
+                })}
+                renderMedia={({ item }) => item.type === "video"
+                    ? <video src={item.src} poster={item.thumbnailSrc} controls playsInline />
+                    : <img src={item.src} alt={item.alt} />}
                 renderCloseButton={(props) => <button {...props}>Close</button>}
                 renderPreviousButton={(props) => <button {...props}>Previous</button>}
                 renderNextButton={(props) => <button {...props}>Next</button>}

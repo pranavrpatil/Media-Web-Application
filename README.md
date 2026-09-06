@@ -27,7 +27,26 @@ npm run build
 npm run dev
 ```
 
+## Documentation
+
+- SDK documentation: [`sdk-docs/index.html`](sdk-docs/index.html)
+- Component documentation: [`components-docs/index.html`](components-docs/index.html)
+
+Both documentation sites are static files. To preview the component docs locally:
+
+```bash
+python -m http.server 4175 --directory components-docs
+```
+
 Copy `.env.example` to `.env` when Pexels data wiring is implemented.
+
+## AI-assisted development
+
+AI coding tools were used for repository exploration, implementation, and review.
+The two reusable skills in [`skills/data-wiring/SKILL.md`](skills/data-wiring/SKILL.md)
+and [`skills/component-usage/SKILL.md`](skills/component-usage/SKILL.md) were used as
+implementation checklists while wiring the web app. Their verification steps are
+covered by the repository typecheck, build, and core test commands.
 
 ## React Compiler
 

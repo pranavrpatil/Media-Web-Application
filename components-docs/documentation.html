@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Media UI Component Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <main>
+        <a class="back" href="index.html">&larr; Component home</a>
+        <header>
+            <p class="eyebrow">Media UI</p>
+            <h1>Component documentation</h1>
+            <p>Current public APIs for the independent headless React and React Native media UI packages.</p>
+        </header>
+        <nav aria-label="Documentation sections">
+            <a href="#react">React</a><a href="#native">React Native</a><a href="#headless">Headless API</a><a
+                href="#examples">Examples</a><a href="#reference">Reference</a>
+        </nav>
+        <h2>Contents</h2>
+        <ul class="toc">
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#react-grid">React Grid</a></li>
+            <li><a href="#react-lightbox">React Lightbox</a></li>
+            <li><a href="#react-reel">React ReelSwiper</a></li>
+            <li><a href="#native-grid">Native Grid</a></li>
+            <li><a href="#native-lightbox">Native Lightbox</a></li>
+            <li><a href="#native-reel">Native ReelSwiper</a></li>
+            <li><a href="#headless">Prop getters</a></li>
+            <li><a href="#styling">Styling</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+            <li><a href="#data-agnostic">Data-agnostic usage</a></li>
+            <li><a href="#examples">Complete examples</a></li>
+            <li><a href="#reference">API reference</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+
+        <h2 id="introduction">Introduction</h2>
+        <p><code>@media/ui-react</code> and <code>@media/ui-native</code> are headless media UI libraries. They own
+            interaction behavior, component state, event handling, scrolling, active-item detection, and the
+            accessibility attributes implemented by the source. The consumer owns data fetching, application state,
+            markup inside render callbacks, CSS or <code>StyleSheet</code>, layout, colors, typography, spacing, and
+            responsive behavior.</p>
+        <p>The components accept the generic <code>MediaItem</code> contract: <code>id</code>, <code>src</code>, and
+            <code>alt</code> are required; <code>type</code>, <code>thumbnailSrc</code>, dimensions, and duration are
+            optional.</p>
+
+        <h2 id="architecture">Architecture</h2>
+        <pre class="diagram">media-core
+  +--&gt; media-react --&gt; React application --&gt; media-ui-react
+  |
+  +--&gt; media-native --&gt; React Native application --&gt; media-ui-native</pre>
+        <p>The UI packages are independent. They do not import <code>@media/core</code>, <code>@media/react</code>,
+            <code>@media/native</code>, or Pexels code. An application maps any source into the UI item contract and
+            connects callbacks to its own state.</p>
+
+        <h2 id="installation">Installation</h2>
+        <pre><code>npm install @media/ui-react react
+npm install @media/ui-native react react-native</code></pre>
+        <p>These packages are private workspace packages in this repository. Build them with
+            <code>npm run build --workspace @media/ui-react</code> and
+            <code>npm run build --workspace @media/ui-native</code>.</p>
+
+        <h2 id="react">React</h2>
+        <h3 id="react-grid">Grid</h3>
+        <p><code>Grid</code> renders a semantic grid wrapper and delegates each item to <code>renderItem</code>. It
+            supports keyboard navigation, item callbacks, and an optional IntersectionObserver load-more trigger. It
+            never performs the request itself.</p>
+        <pre><code>import { Grid, type MediaItem } from "@media/ui-react";
+
+const items: MediaItem[] = [
+    { id: "1", src: "/mountain.jpg", alt: "A mountain lake", type: "image" },
+];
+
+&lt;Grid
+    items={items}
+    columnCount={4}
+    ariaLabel="Search results"
+    onItemClick={(item, index) =&gt; setSelectedIndex(index)}
+    renderItem={({ item, getItemProps }) =&gt; (
+        &lt;article {...getItemProps()}&gt;
+            &lt;img src={item.src} alt={item.alt} /&gt;
+        &lt;/article&gt;
+    )}
+/&gt;</code></pre>
+        <table>
+            <tr>
+                <th>Prop</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>items</code></td>
+                <td><code>readonly T[]</code></td>
+                <td>Yes</td>
+                <td>Items extending <code>MediaItem</code>.</td>
+            </tr>
+            <tr>
+                <td><code>renderItem</code></td>
+                <td><code>(context) =&gt; ReactNode</code></td>
+                <td>Yes</td>
+                <td>Renders an item using <code>item</code>, <code>index</code>, and <code>getItemProps()</code>.</td>
+            </tr>
+            <tr>
+                <td><code>getItemKey</code></td>
+                <td><code>(item, index) =&gt; Key</code></td>
+                <td>No</td>
+                <td>Defaults to <code>item.id</code>.</td>
+            </tr>
+            <tr>
+                <td><code>getItemProps</code></td>
+                <td><code>(item, index) =&gt; HTMLAttributes</code></td>
+                <td>No</td>
+                <td>Consumer props merged before generated grid behavior.</td>
+            </tr>
+            <tr>
+                <td><code>ariaLabel</code></td>
+                <td><code>string</code></td>
+                <td>No</td>
+                <td>Grid label; defaults to <code>Media grid</code>.</td>
+            </tr>
+            <tr>
+                <td><code>columnCount</code></td>
+                <td><code>number</code></td>
+                <td>No</td>
+                <td>Arrow up/down focus step; it does not create CSS columns.</td>
+            </tr>
+            <tr>
+                <td><code>onItemClick</code>, <code>onItemFocus</code></td>
+                <td><code>(item, index) =&gt; void</code></td>
+                <td>No</td>
+                <td>Called after the corresponding interaction.</td>
+            </tr>
+            <tr>
+                <td><code>onLoadMore</code></td>
+                <td><code>() =&gt; void | Promise&lt;void&gt;</code></td>
+                <td>No</td>
+                <td>Called when the load-more sentinel intersects.</td>
+            </tr>
+            <tr>
+                <td><code>hasMore</code>, <code>loadingMore</code></td>
+                <td><code>boolean</code></td>
+                <td>No</td>
+                <td>Enable the sentinel and prevent observation while loading.</td>
+            </tr>
+            <tr>
+                <td><code>renderLoadMoreTrigger</code></td>
+                <td><code>(props) =&gt; ReactNode</code></td>
+                <td>No</td>
+                <td>Custom sentinel. Receives <code>ref</code> and <code>aria-busy</code>.</td>
+            </tr>
+        </table>
+        <p>Grid keyboard behavior is Enter/Space to activate, arrow keys to move, and Home/End to reach the first/last
+            item. With <code>hasMore</code>, the observer calls <code>onLoadMore</code>; the application should append
+            items and manage <code>loadingMore</code>.</p>
+
+        <h3 id="react-lightbox">Lightbox</h3>
+        <p><code>Lightbox</code> is controlled by <code>open</code> and <code>item</code>. It returns <code>null</code>
+            when closed or when there is no item. The default renderer displays an <code>img</code> or a
+            <code>video controls</code> element based on <code>item.type</code>; use <code>renderMedia</code> for custom
+            media.</p>
+        <pre><code>&lt;Lightbox
+    open={selected !== null}
+    item={selected}
+    items={items}
+    index={selectedIndex}
+    onClose={() =&gt; setSelectedIndex(null)}
+    onPrevious={() =&gt; setSelectedIndex((value) =&gt; Math.max(0, value - 1))}
+    onNext={() =&gt; setSelectedIndex((value) =&gt; Math.min(items.length - 1, value + 1))}
+    renderMedia={({ item, getMediaProps }) =&gt; (
+        item.type === "video"
+            ? &lt;video {...getMediaProps()} src={item.src} controls /&gt;
+            : &lt;img {...getMediaProps()} src={item.src} alt={item.alt} /&gt;
+    )}
+/&gt;</code></pre>
+        <table>
+            <tr>
+                <th>Prop</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>open</code>, <code>item</code>, <code>onClose</code></td>
+                <td><code>boolean</code>, <code>T | null</code>, <code>() =&gt; void</code></td>
+                <td>Yes</td>
+                <td>Controlled visibility, selected media, and close callback.</td>
+            </tr>
+            <tr>
+                <td><code>items</code>, <code>index</code></td>
+                <td><code>readonly T[]</code>, <code>number</code></td>
+                <td>No</td>
+                <td>Navigation collection and current index. Index defaults to 0.</td>
+            </tr>
+            <tr>
+                <td><code>onNext</code>, <code>onPrevious</code></td>
+                <td><code>() =&gt; void</code></td>
+                <td>No</td>
+                <td>Enable corresponding controls when supplied and in range.</td>
+            </tr>
+            <tr>
+                <td><code>loop</code></td>
+                <td><code>boolean</code></td>
+                <td>No</td>
+                <td>Allows navigation at collection boundaries; the app still changes the item.</td>
+            </tr>
+            <tr>
+                <td><code>closeOnEscape</code>, <code>closeOnBackdropClick</code></td>
+                <td><code>boolean</code></td>
+                <td>No</td>
+                <td>Both default to true.</td>
+            </tr>
+            <tr>
+                <td><code>renderMedia</code>, button render props</td>
+                <td>Render callbacks</td>
+                <td>No</td>
+                <td>Customize media, close, previous, and next controls.</td>
+            </tr>
+        </table>
+        <p>When opened, focus moves to the close button. On close, focus returns to the previously focused element.
+            Escape closes by default; Left/Right call navigation callbacks when available. The dialog has
+            <code>role="dialog"</code>, <code>aria-modal="true"</code>, and a configurable label.</p>
+
+        <h3 id="react-reel">ReelSwiper</h3>
+        <p><code>ReelSwiper</code> renders a region with carousel semantics and one slide per item. It supports
+            controlled <code>activeIndex</code> or an initial <code>defaultActiveIndex</code>. IntersectionObserver
+            detects the slide that is at least 60% visible; keyboard navigation is enabled by default.</p>
+        <pre><code>&lt;ReelSwiper
+    items={videos}
+    ariaLabel="Video reels"
+    activeIndex={activeIndex}
+    onActiveItemChange={(item, index) =&gt; setActiveIndex(index)}
+    renderSlide={({ item, isActive, getSlideProps }) =&gt; (
+        &lt;article {...getSlideProps()}&gt;
+            &lt;video src={item.src} controls playsInline autoPlay={isActive} /&gt;
+            &lt;p&gt;{item.alt}&lt;/p&gt;
+        &lt;/article&gt;
+    )}
+/&gt;</code></pre>
+        <table>
+            <tr>
+                <th>Prop</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>items</code>, <code>renderSlide</code></td>
+                <td><code>readonly T[]</code>, <code>(context) =&gt; ReactNode</code></td>
+                <td>Yes</td>
+                <td>Slides and custom slide rendering.</td>
+            </tr>
+            <tr>
+                <td><code>activeIndex</code></td>
+                <td><code>number</code></td>
+                <td>No</td>
+                <td>Controlled active index.</td>
+            </tr>
+            <tr>
+                <td><code>defaultActiveIndex</code></td>
+                <td><code>number</code></td>
+                <td>No</td>
+                <td>Initial uncontrolled index; defaults to 0.</td>
+            </tr>
+            <tr>
+                <td><code>onActiveItemChange</code></td>
+                <td><code>(item, index) =&gt; void</code></td>
+                <td>No</td>
+                <td>Called on keyboard selection or visibility changes.</td>
+            </tr>
+            <tr>
+                <td><code>getItemKey</code>, <code>ariaLabel</code></td>
+                <td><code>(item, index) =&gt; Key</code>, <code>string</code></td>
+                <td>No</td>
+                <td>Key defaults to <code>item.id</code>; label defaults to <code>Media reel</code>.</td>
+            </tr>
+            <tr>
+                <td><code>loop</code>, <code>keyboardNavigation</code></td>
+                <td><code>boolean</code></td>
+                <td>No</td>
+                <td>Both default to true only for keyboard navigation; loop defaults to false.</td>
+            </tr>
+        </table>
+        <p>The component does not play, pause, or fetch video itself. Use <code>isActive</code> to decide how your
+            renderer handles a video. The consumer must give the viewport/slides dimensions and scrolling CSS.</p>
+
+        <h2 id="native">React Native</h2>
+        <p>Import the native package from <code>@media/ui-native</code>. Its item contract is the same, but props use
+            React Native types and names.</p>
+        <h3 id="native-grid">Grid</h3>
+        <p>Native <code>Grid</code> wraps <code>FlatList</code>, passes <code>numColumns</code>, and uses
+            <code>onEndReachedThreshold={0.7}</code>. When <code>hasMore</code> is true and <code>loadingMore</code> is
+            false, it wires <code>onLoadMore</code> to <code>onEndReached</code>.</p>
+        <pre><code>import { Grid } from "@media/ui-native";
+
+&lt;Grid
+    items={items}
+    numColumns={2}
+    onItemPress={(item, index) =&gt; setSelected(item)}
+    onLoadMore={() =&gt; loadNextPage()}
+    hasMore={hasMore}
+    loadingMore={loading}
+    renderItem={({ item, getItemProps }) =&gt; (
+        &lt;Pressable {...getItemProps()}&gt;
+            &lt;Image source={{ uri: item.src }} accessibilityLabel={item.alt} /&gt;
+        &lt;/Pressable&gt;
+    )}
+/&gt;</code></pre>
+        <p>Props are <code>items</code>, <code>renderItem</code>, <code>getItemKey</code>, <code>getItemProps</code>,
+            <code>accessibilityLabel</code>, <code>numColumns</code>, <code>onItemPress</code>,
+            <code>onItemFocus</code>, <code>onLoadMore</code>, <code>hasMore</code>, and <code>loadingMore</code>. The
+            render context provides <code>item</code>, <code>index</code>, and <code>getItemProps()</code>, which
+            returns <code>PressableProps</code> with accessible grid-cell behavior.</p>
+
+        <h3 id="native-lightbox">Lightbox</h3>
+        <p>Native <code>Lightbox</code> is controlled by <code>visible</code> and <code>item</code>. It uses React
+            Native <code>Modal</code> and closes through <code>onClose</code> or the Android hardware back button. The
+            default renderer is an <code>Image</code>; video requires a custom <code>renderMedia</code> implementation
+            such as a video component from your application.</p>
+        <pre><code>import { Lightbox } from "@media/ui-native";
+
+&lt;Lightbox
+    visible={selected !== null}
+    item={selected}
+    items={items}
+    index={selectedIndex}
+    onClose={() =&gt; setSelected(null)}
+    renderMedia={({ item, getMediaProps }) =&gt; (
+        &lt;Image {...getMediaProps()} source={{ uri: item.src }} /&gt;
+    )}
+/&gt;</code></pre>
+        <p>Native props are <code>visible</code>, <code>item</code>, optional <code>items</code>/<code>index</code>,
+            <code>accessibilityLabel</code>, <code>onClose</code>, optional <code>onNext</code>/<code>onPrevious</code>,
+            <code>loop</code>, <code>renderMedia</code>, and the three button render callbacks. The library supplies
+            dialog and button accessibility labels. It does not implement focus restoration or a keyboard Escape
+            interaction.</p>
+
+        <h3 id="native-reel">ReelSwiper</h3>
+        <p>Native <code>ReelSwiper</code> wraps a vertical, paging-enabled <code>FlatList</code>. It uses a 60%
+            item-visible threshold to detect the active item and calls <code>onActiveItemChange(item, index)</code>. It
+            accepts <code>items</code>, <code>renderSlide</code>, optional controlled/initial indices,
+            <code>onActiveItemChange</code>, <code>getItemKey</code>, and <code>accessibilityLabel</code>.</p>
+        <pre><code>&lt;ReelSwiper
+    items={videos}
+    accessibilityLabel="Video reels"
+    onActiveItemChange={(item, index) =&gt; setActiveIndex(index)}
+    renderSlide={({ item, isActive, getSlideProps }) =&gt; (
+        &lt;View {...getSlideProps()}&gt;
+            &lt;Video source={{ uri: item.src }} paused={!isActive} /&gt;
+        &lt;/View&gt;
+    )}
+/&gt;</code></pre>
+        <p>The render context supplies <code>item</code>, <code>index</code>, <code>isActive</code>, and
+            <code>getSlideProps()</code>. The package does not include a video player and does not expose a native
+            <code>loop</code> or keyboard-navigation prop.</p>
+
+        <h2 id="headless">Headless API and prop getters</h2>
+        <p>A prop getter is a render-context function that returns the platform props needed for the behavior owned by
+            the component. Spread it onto the interactive element you render, then add your own class names, styles, and
+            content.</p>
+        <pre><code>renderItem={({ item, getItemProps }) =&gt; (
+    &lt;button {...getItemProps()} className="tile" type="button"&gt;
+        &lt;img src={item.src} alt={item.alt} /&gt;
+    &lt;/button&gt;
+)}
+
+renderSlide={({ getSlideProps, item }) =&gt; (
+    &lt;article {...getSlideProps()}&gt;{item.alt}&lt;/article&gt;
+)}</code></pre>
+        <p>React Grid's generated props include <code>role="gridcell"</code>, <code>tabIndex</code>, click/focus/key
+            handlers, and arrow/Home/End behavior. React Lightbox's <code>getMediaProps()</code> supplies an
+            <code>aria-label</code>. React ReelSwiper's <code>getSlideProps()</code> supplies active/inactive tab order.
+            Native getters supply the corresponding <code>PressableProps</code>, <code>ViewProps</code>, or
+            accessibility state. Consumer handlers are invoked before the library callback where both are composed.</p>
+
+        <h2 id="styling">Styling</h2>
+        <p>No application CSS is shipped. For React, the component controls structure and behavior; the consumer sets
+            the grid layout and media dimensions:</p>
+        <pre><code>.results-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.tile img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.reel-viewport { height: 80vh; overflow-y: auto; scroll-snap-type: y mandatory; }
+.reel-slide { min-height: 80vh; scroll-snap-align: start; }</code></pre>
+        <p>In React Native, pass styles to the elements you render or use <code>StyleSheet.create</code>. The native
+            Grid owns the <code>FlatList</code>; the item render callback owns the tile appearance and dimensions.</p>
+        <pre><code>const styles = StyleSheet.create({
+    tile: { flex: 1, aspectRatio: 1, margin: 4 },
+    media: { width: "100%", height: "100%" },
+});</code></pre>
+
+        <h2 id="accessibility">Accessibility</h2>
+        <p><strong>Library responsibilities:</strong> React Grid emits a grid and grid-cell semantics, keyboard
+            movement, and focus handling. React Lightbox emits dialog semantics, modal state, labels, close-button
+            focus, Escape handling, and focus return. React ReelSwiper emits region/carousel/slide semantics and active
+            slide state. Native components emit the accessibility roles, labels, selected state, and modal/back-button
+            behavior visible in their source.</p>
+        <p><strong>Consumer responsibilities:</strong> provide meaningful
+            <code>alt</code>/<code>accessibilityLabel</code> values, keep custom controls visibly labeled, spread the
+            getter props onto the intended element, provide usable dimensions and focusable controls, and ensure custom
+            media players expose their own controls. The packages do not claim WCAG compliance and do not provide a
+            focus trap, native video player, or automatic styling.</p>
+
+        <h2 id="data-agnostic">Data-agnostic usage</h2>
+        <p>The UI library does not care whether items come from Pexels, another REST or GraphQL API, local JSON, a
+            database, another SDK, or generated data.</p>
+        <pre><code>import { Grid, type MediaItem } from "@media/ui-react";
+
+const media: MediaItem[] = [
+    { id: "1", type: "image", src: "/example.jpg", alt: "Example image" },
+];
+
+&lt;Grid
+    items={media}
+    renderItem={({ item, getItemProps }) =&gt; (
+        &lt;button {...getItemProps()} type="button"&gt;
+            &lt;img src={item.src} alt={item.alt} /&gt;
+        &lt;/button&gt;
+    )}
+/&gt;</code></pre>
+
+        <h2 id="examples">Complete examples</h2>
+        <h3>Grid + Lightbox</h3>
+        <pre><code>const [selectedIndex, setSelectedIndex] = useState&lt;number | null&gt;(null);
+const selected = selectedIndex === null ? null : media[selectedIndex];
+
+&lt;Grid
+    items={media}
+    onItemClick={(_, index) =&gt; setSelectedIndex(index)}
+    renderItem={({ item, getItemProps }) =&gt; (
+        &lt;article {...getItemProps()}&gt;
+            &lt;img src={item.src} alt={item.alt} /&gt;
+        &lt;/article&gt;
+    )}
+/&gt;
+&lt;Lightbox
+    open={selected !== null}
+    item={selected}
+    items={media}
+    index={selectedIndex ?? 0}
+    onClose={() =&gt; setSelectedIndex(null)}
+/&gt;</code></pre>
+        <h3>Video results and reel</h3>
+        <pre><code>&lt;ReelSwiper
+    items={videos}
+    onActiveItemChange={(item, index) =&gt; {
+        setActiveIndex(index);
+        analytics.track("reel-view", { id: item.id });
+    }}
+    renderSlide={({ item, isActive, getSlideProps }) =&gt; (
+        &lt;article {...getSlideProps()}&gt;
+            &lt;video src={item.src} controls playsInline autoPlay={isActive} /&gt;
+            &lt;p&gt;{item.alt}&lt;/p&gt;
+        &lt;/article&gt;
+    )}
+/&gt;</code></pre>
+
+        <h3 id="integration">SDK + UI integration</h3>
+        <p>The application is the boundary between data and UI. <code>@media/react</code> handles the SDK client and
+            search state; <code>@media/ui-react</code> only receives mapped items.</p>
+        <pre><code>import { MediaProvider, useMediaSearch } from "@media/react";
+import { Grid, type MediaItem } from "@media/ui-react";
+import { client } from "./media-client";
+
+function Results() {
+    const search = useMediaSearch({ type: "photo", query: "mountains", page: 1 });
+    const items: MediaItem[] = search.results.map((photo) =&gt; ({
+        id: photo.id,
+        src: photo.src.medium,
+        thumbnailSrc: photo.src.small,
+        alt: photo.alt || `Photo by ${photo.photographer}`,
+        width: photo.width,
+        height: photo.height,
+    }));
+
+    return &lt;Grid
+        items={items}
+        hasMore={search.hasMore}
+        loadingMore={search.loading}
+        onLoadMore={search.loadMore}
+        renderItem={({ item, getItemProps }) =&gt; (
+            &lt;article {...getItemProps()}&gt;
+                &lt;img src={item.thumbnailSrc ?? item.src} alt={item.alt} /&gt;
+            &lt;/article&gt;
+        )}
+    /&gt;;
+}
+
+&lt;MediaProvider client={client}&gt;&lt;Results /&gt;&lt;/MediaProvider&gt;</code></pre>
+        <p>For videos, map a Pexels <code>video_file.link</code> to <code>src</code>, the Pexels <code>image</code> to
+            <code>thumbnailSrc</code>, and set <code>type: "video"</code>. The component package remains unaware of that
+            mapping.</p>
+
+        <h2 id="reference">API reference overview</h2>
+        <table>
+            <tr>
+                <th>Package</th>
+                <th>Exports</th>
+                <th>Behavior surface</th>
+            </tr>
+            <tr>
+                <td><code>@media/ui-react</code></td>
+                <td><code>Grid</code>, <code>Lightbox</code>, <code>ReelSwiper</code>, related props/context/types</td>
+                <td>DOM attributes, keyboard handling, IntersectionObserver, focus behavior, render callbacks</td>
+            </tr>
+            <tr>
+                <td><code>@media/ui-native</code></td>
+                <td><code>Grid</code>, <code>Lightbox</code>, <code>ReelSwiper</code>, related props/context/types</td>
+                <td>FlatList, Modal, Pressable/View props, viewability, hardware back handling</td>
+            </tr>
+        </table>
+        <p>There are no public UI hooks in either package. The complete public type names are <code>MediaId</code>,
+            <code>MediaItem</code>, <code>GridProps</code>, <code>GridItemRenderContext</code>,
+            <code>LightboxProps</code>, <code>LightboxRenderContext</code>, <code>ReelSwiperProps</code>, and
+            <code>ReelSlideRenderContext</code>. React uses DOM attribute types; native uses React Native
+            <code>PressableProps</code> and <code>ViewProps</code>.</p>
+
+        <h2 id="troubleshooting">Troubleshooting</h2>
+        <ul>
+            <li><strong>Nothing appears:</strong> pass a non-empty <code>items</code> array and return visible markup
+                from the render callback.</li>
+            <li><strong>Load more does not run:</strong> set <code>hasMore</code>, pass <code>onLoadMore</code>, and
+                clear <code>loadingMore</code> after appending results. The web sentinel also needs room to intersect.
+            </li>
+            <li><strong>Keyboard movement is wrong:</strong> React Grid uses <code>columnCount</code> only as the
+                vertical focus step; CSS still defines the visual layout.</li>
+            <li><strong>Reel video does not play:</strong> use <code>isActive</code> in your renderer. The library does
+                not own a video player.</li>
+            <li><strong>Native video is missing:</strong> supply a custom <code>renderMedia</code> or
+                <code>renderSlide</code>; the native Lightbox default is an Image.</li>
+            <li><strong>API errors:</strong> keep fetching and authentication in
+                <code>@media/core</code>/<code>@media/react</code>; the UI packages accept already-mapped data only.
+            </li>
+        </ul>
+        <p class="small"><a href="../README.md">Back to repository README</a></p>
+    </main>
+</body>
+
+</html>

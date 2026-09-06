@@ -65,6 +65,9 @@ export function createMediaClient(options: MediaClientOptions): MediaClient {
     const cache = options.cache ?? new MemoryCache();
     const pending = new Map<string, Promise<unknown>>();
     const events = new MediaEventEmitter();
+    events.subscribe((event) => {
+        console.log("media-core event", event);
+    });
     const baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
 
     const requester = {

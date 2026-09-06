@@ -17,6 +17,6 @@ export class VideoService {
     }
 
     getById(id: number): Promise<Video> {
-        return this.requester.request<Video>(`/v1/videos/videos/${id}`);
+        return this.requester.request<Video>(`/v1/videos/${id}`);
     }
 }

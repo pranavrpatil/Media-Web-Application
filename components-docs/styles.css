@@ -1,0 +1,165 @@
+:root {
+    color-scheme: light;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #172033;
+    background: #f5f7fb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+}
+
+a {
+    color: #293a9b;
+}
+
+header {
+    margin-bottom: 42px;
+}
+
+.eyebrow {
+    color: #5263c8;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 12px 0;
+    font-size: clamp(2.3rem, 6vw, 4rem);
+    line-height: 1.05;
+    letter-spacing: -.04em;
+}
+
+h2 {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid #dfe4ef;
+}
+
+h3 {
+    margin-top: 32px;
+}
+
+p,
+li {
+    color: #536078;
+    line-height: 1.7;
+}
+
+li {
+    margin: 8px 0;
+}
+
+code {
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #293a9b;
+    background: #e9ecfb;
+}
+
+pre {
+    overflow-x: auto;
+    padding: 20px;
+    border-radius: 8px;
+    color: #edf1ff;
+    background: #172033;
+    line-height: 1.55;
+}
+
+pre code {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0 42px;
+}
+
+nav a,
+.back {
+    display: inline-block;
+    padding: 10px 14px;
+    border: 1px solid #d5dbeb;
+    border-radius: 8px;
+    color: #293a9b;
+    background: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+nav a:hover,
+.back:hover {
+    border-color: #5263c8;
+    background: #f0f2ff;
+}
+
+.toc {
+    columns: 2 260px;
+    padding-left: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+}
+
+th,
+td {
+    padding: 11px 12px;
+    border: 1px solid #dfe4ef;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    color: #172033;
+    background: #edf0f8;
+}
+
+.note {
+    padding: 16px 18px;
+    border-left: 4px solid #5263c8;
+    background: #fff;
+}
+
+.diagram {
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.small {
+    font-size: .92rem;
+}
+
+@media (max-width: 640px) {
+    main {
+        padding: 32px 16px 56px;
+    }
+
+    .toc {
+        columns: 1;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+}
